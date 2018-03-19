@@ -62,31 +62,79 @@ function backgroundImageLock() {
     canvas.renderAll();
 }
 
+// Function used for setting up a canvas entity's transparency
+function transparency(column, value) {
+    if (document.getElementById(column + "-" + value + "Option") != null) {
+        document.getElementById(column + "-" + value + "Option").remove();
+    }
+    if (document.getElementById(column + "-" + value + "Option") == null) {
+        $("#" + column + "-" + value + "Prop").append("<div class='dropdown' style='float:right;margin-right:2em' id='" + column + "-" + value + "Option'><button class='btn btn-secondary dropdown-toggle'\
+        type='button' id='" + column + "-" + value + "Trans' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Select Transparency</button>\
+        <div class='dropdown-menu' aria-labelledby='" + column + "-" + value + "Trans'><button class='dropdown-item' onclick='changeTransparency(\"Normal\")'>Normal</button><button class='dropdown-item' onclick='changeTransparency(\"Low\")'>Low</button>\
+        <button class='dropdown-item' onclick='changeTransparency(\"Very Low\")'>Very Low</button></div></div>");
+    }
+}
+
+function changeTransparency(value) {
+    if (value == 'Normal') {
+        canvas.item(id).opacity = 1;
+    }
+    if (value == 'Low') {
+        canvas.item(id).opacity = 0.66;
+    }
+    if (value == 'Very Low') {
+        canvas.item(id).opacity = 0.33;
+    }
+}
+
+
+// Function used for adding images to out base image
+function editImage(column, value) {
+    if (document.getElementById(column + "-" + value + "Option") != null) {
+        document.getElementById(column + "-" + value + "Option").remove();
+    }
+    if (document.getElementById(column + "-" + value + "Option") == null) {
+        $("#" + column + "-" + value + "Prop").append("<input type='file' style='float:right;margin-right:10px' id='" + column + "-" + value + "Option'>");
+    }
+    var img = fabric.util.object.clone(entityPool[id - 1].image)
+    var group = new fabric.Group([img]);
+    // TO IMPLEMENT - ADD IMAGE FROM FILE IMPUT, MAKE IT SELECTABLE, POSITION IT, SELECT GROUP
+    var circle = new fabric.Circle({
+        radius: 50,
+        fill: 'red'
+    });
+    group.add(circle);
+    canvas.remove(canvas.item(id-1));
+    canvas.add(group);
+}
+
 // Function used for adding entity
 function addEntity(type) {
 
-    /*var entity;
+    var canvasEntity;
     var selectedImage = document.getElementById(type.id).value;
     var fakePath = selectedImage.split('\\');
     var path = fakePath[fakePath.length - 1];
     fabric.Image.fromURL(path, function (oImg) {
-        entity = new CanvasEntity(oImg, type, id);
-        entityPool.push(entity);
+        canvasEntity = new CanvasEntity(oImg, type, id);
+        entityPool.push(canvasEntity);
         document.getElementById(type.id + 'Lock').setAttribute('onclick', 'lockImage(' + id + ')');
         document.getElementById(type.id + 'Remove').setAttribute('onclick', 'removeEntity(' + id + ')');
         id = id + 1;
         canvas.add(oImg);
         console.log(entityPool);
-    });*/
+    });
 
     var addInput = document.getElementById(type.id + 'Add').value;
     var tableEntity;
+    // Selecting the entity named after the type parameter
     for (var i = 0 ; i < tableEntities.length; i ++) {
         if (tableEntities[i].name == type.id) {
             tableEntity = tableEntities[i];
             break;
         }
     }
+    // Building insert regex
     var insertRegex = "INSERT INTO " + tableEntity.name + "\\s?\\(\\s?";
     var columns = [];
     var columnIterator = tableEntity.properties.keys();
@@ -122,14 +170,28 @@ function addEntity(type) {
 
     var tableId = '#' + type.id + 'Table';
 
+    // Inserting a record into table
+
     $(tableId).find('tbody').append("<tr><th scope='row'>" + tableEntity.records.length + "</th></tr>")
     for (var i = 0; i < record.length; i ++) {
-        $('#tablesModalContent th:last').after("<td>" + record[i] + "</td>")
+        $('#tablesModalContent th:last').after("<td>&nbsp;&nbsp;" + record[i] + "</td>")
     }
 
     document.getElementById(type.id + 'Add').value = document.getElementById(type.id + 'Add').defaultValue;
 
-    // TO IMPLEMENT - ADD DEFAULT IMAGE OPTION, DETECT PROPERTIES
+    record.reverse();
+
+    // TO IMPLEMENT - check for duplicate values
+
+
+    // Adding edit button with options for each value a property can take
+    for (var i = 0; i < columns.length; i ++) {
+        console.log(columns[i])
+        $("#" + columns[i] + "List").append("<li class='list-group-item' id='" + columns[i] + "-" + record[i] + "Prop'>" + record[i] + "<div class='dropdown' style='float:right'>\
+        <button class='btn btn-secondary dropdown-toggle' type='button' id='" + columns[i] + "Dropdown' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>\
+        Edit Value: </button><div class='dropdown-menu' aria-labelledby='" + columns[i] + "Dropdown'><button class='dropdown-item' onclick='transparency(\"" + columns[i] + "\", \"" + record[i] + "\")'>\
+        Change Transparency</button><button class='dropdown-item' onclick='editImage(\"" + columns[i] + "\", \"" + record[i] + "\")'>Add image</button></div></div></li>");
+    }
 }
 
 // Function used for removing entity
@@ -241,18 +303,27 @@ function addEntityType() {
     $('#entities').append("<div class='input-group'><textarea class='form-control' placeholder='INSERT Statement' id='" + type + 
     "Add' rows='2'></textarea><div class='input-group-append'><button class='btn btn-outline-secondary' type='button' onclick='addEntity(" + type +
     ")'>Add</button></div></div><br>")
+
+    // Modal that shows entity properties and allows editing for each possible value
+    $('#entities').append("<button type='button' class='btn btn-secondary' data-toggle='modal' data-target='#properties' id='showProperties'>Current Properties</button>\
+    <div class='modal fade' id='properties' tabindex='-1' role='dialog' aria-labelledby='propertiesLabel' aria-hidden='true'>\
+    <div class='modal-dialog modal-lg' role='document'>\
+    <div class='modal-content'>\
+    <div class='modal-header'>\
+    <p class='h3' class='modal-title' id='propertiesLabel'>Properties for table <span class='badge badge-info'>" + type + "</span> :</p>\
+    <button type='button' class='close' data-dismiss='modal' aria-label='Close'>\
+    <span aria-hidden='true'>&times;</span></button></div>\
+    <div class='modal-body' id='propertiesModalContent'></div></div></div></div><br><br>");
+
+    // Adding to the properties modal all the table's properties
+    for (var i = 0; i < entityColumnNames.length; i ++) {
+        $('#propertiesModalContent').append("<ul class='list-group' id='" + entityColumnNames[i] + "List'><li class='list-group-item list-group-item-dark'><center>" + entityColumnNames[i] + " Values:</center></li></ul><br>");
+    }
+
     // Remove entity
     $('#entities').append("<button type='button' class='btn btn-secondary' onclick='removeEntity(" + id + ")' id='" + type + "Remove'>Remove Selected Entity</button>\t");
     // Set entity position
     $('#entities').append("<button type='button' class='btn btn-secondary' onclick='lockImage(" + id + ")' id='" + type + "Lock'>Set Entity Position</button>");
-
-
-    /*$('#entities').append("<p><b>Choose image for " + type + ": </b></p>");
-    $('#entities').append("<input class='custom-file' type='file' id='" + type + "'><br>");
-    $('#entities').append("<span><button type='button' class='btn btn-primary' onclick='addEntity(" + type + ")'>Add</button>\t\t\t");
-    $('#entities').append("<button type='button' class='btn btn-primary' onclick='removeEntity(" + id + ")' id='" + type + "Remove'>Remove</button>\t\t\t");
-    $('#entities').append("<button type='button' class='btn btn-primary' onclick='lockImage(" + id + ")' id='" + type + "Lock'>Set Position</button></span><br><br>");*/
-
 
     document.getElementById('entityInput').value = document.getElementById('entityInput').defaultValue;
 }
