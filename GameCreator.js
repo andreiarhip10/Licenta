@@ -16,12 +16,20 @@ var tableEntities = [];
 // Variable used for storing entity id's
 var id = 0;
 
+//SQLite compiler
+var sql = window.SQL;
+
+//Virtual database
+var db = new sql.Database();
+
 // Canvas entity class
 class CanvasEntity {
-    constructor(image, type, id) {
+    constructor(image, type, id, addedImages, tableEntity) {
         this.image = image;
         this.type = type;
         this.id = id;
+        this.addedImages = addedImages;
+        this.tableEntity = tableEntity;
     }
 }
 
@@ -38,6 +46,12 @@ class TableEntity {
 // Function used for initiating canvas
 function initCanvas() {
     canvas = new fabric.Canvas('gameCanvas');
+    /*sqlstr = "CREATE TABLE hello ( a integer, b varchar2 );"
+    db.run(sqlstr);
+    sqlstr2 = "INSERT INTO hello ( a, b ) VALUES ( 0, 'hello');"
+    sqlstr2 += "INSERT INTO hello ( a, b ) VALUES ( 1, 'world');"
+    db.run(sqlstr2);
+    console.log(db.exec("SELECT * FROM hello"));*/
 }
 
 // Function used for selecting game background
@@ -62,8 +76,8 @@ function backgroundImageLock() {
     canvas.renderAll();
 }
 
-// Function used for setting up a canvas entity's transparency
-function transparency(column, value) {
+// Function used for setting up a canvas entity's transparency - OBSOLETE
+/*function transparency(column, value) {
     if (document.getElementById(column + "-" + value + "Option") != null) {
         document.getElementById(column + "-" + value + "Option").remove();
     }
@@ -85,7 +99,7 @@ function changeTransparency(value) {
     if (value == 'Very Low') {
         canvas.item(id).opacity = 0.33;
     }
-}
+}*/
 
 
 // Function used for adding images to out base image
@@ -94,29 +108,104 @@ function editImage(column, value) {
         document.getElementById(column + "-" + value + "Option").remove();
     }
     if (document.getElementById(column + "-" + value + "Option") == null) {
-        $("#" + column + "-" + value + "Prop").append("<input type='file' style='float:right;margin-right:10px' id='" + column + "-" + value + "Option'>");
+        $("#" + column + "-" + value + "Prop").append("<input type='file' style='margin-left:20px' id='" + column + "-" + value + "Option'>");
     }
-    var img = fabric.util.object.clone(entityPool[id - 1].image)
-    var group = new fabric.Group([img]);
+    if (document.getElementById(column + "-" + value + "AddImageButton") == null) {
+        $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary' style='float:right;margin-right:10px' id='" + column + "-" + value + "AddImageButton' \
+        onclick='applyImage(\"" + column + "\", \"" + value + "\")'>Add Image</button>");
+    }
+    
     // TO IMPLEMENT - ADD IMAGE FROM FILE IMPUT, MAKE IT SELECTABLE, POSITION IT, SELECT GROUP
-    var circle = new fabric.Circle({
-        radius: 50,
-        fill: 'red'
-    });
-    group.add(circle);
-    canvas.remove(canvas.item(id-1));
-    canvas.add(group);
+    /*fabric.Image.fromURL("entity-sample-1.png", function(img) {
+        var addedImg = img.scale(0.1).set({ left: 100, top: 100 });
+        group.add(addedImg);
+        console.log("Canvas entities before remove: " + canvas.getObjects());
+        canvas.remove(canvas.item(id));
+        
+        canvas.add(group);
+        console.log("Canvas entities after remove: " + canvas.getObjects());
+    })*/
+
+    
+
+
+    entityPool[id - 1].addedImages ++;
+    // TO IMPLEMENT - support for changing image position, scale
+    
+    //group._objects[1].set({top: 50});
 }
 
-// Function used for adding entity
+function applyImage(column, value) {
+    var img = fabric.util.object.clone(entityPool[id - 1].image)
+    var group = new fabric.Group([img]);
+
+    var newImage = document.getElementById(column + "-" + value + "Option").value;
+    var fakePath = newImage.split('\\');
+    var path = fakePath[fakePath.length - 1];
+    fabric.Image.fromURL(path, function(img) {
+        var addedImage = img.scale(0.1).set({ left: 100, top: 100 });
+        group.add(addedImage);
+        console.log("Canvas entities before remove: " + canvas.getObjects());
+        canvas.remove(canvas.item(id));
+        
+        canvas.add(group);
+        console.log("Canvas entities after remove: " + canvas.getObjects());
+    })
+
+    console.log(group._objects);
+
+    var jsonImg = JSON.stringify(img, null, 2);
+
+    // img.toString().replace("{", "\"{").replace("}", "\"}").replace("\"","\\\"").replace("#","\#")
+
+    // TO IMPLEMENT - pass { } as parameters
+
+    if (document.getElementById(column + "-" + value + "MoveUp") == null) {
+        $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:10px' id='" + column + "-" + value + "MoveUp' \
+        onclick='moveUp\(\"" + path + "\"\, \"" + jsonImg + "\"\)'>Up</button>");
+    }
+
+    entityPool[id - 1].image = group;
+    
+}
+
+function moveUp(path, jsonImg) {
+
+    var img = JSON.parse(jsonImg);
+
+    img = img.toString().replace("crox1","{").replace("crox2", "}");
+
+    var group = new fabric.Group([img]);
+
+    fabric.Image.fromURL(path, function(img) {
+        var addedImage = img.scale(0.1).set({ left: 100, top: 90 });
+        group.add(addedImage);
+        canvas.remove(canvas.item(id));
+        
+        canvas.add(group);
+    })
+
+    entityPool[id - 1].image = group;
+}
+
+// Function used for adding entity - add after specific ID
 function addEntity(type) {
+
+    var tableEntity;
+    // Selecting the entity named after the type parameter
+    for (var i = 0 ; i < tableEntities.length; i ++) {
+        if (tableEntities[i].name == type.id) {
+            tableEntity = jQuery.extend(true, {}, tableEntities[i]);
+            break;
+        }
+    }
 
     var canvasEntity;
     var selectedImage = document.getElementById(type.id).value;
     var fakePath = selectedImage.split('\\');
     var path = fakePath[fakePath.length - 1];
     fabric.Image.fromURL(path, function (oImg) {
-        canvasEntity = new CanvasEntity(oImg, type, id);
+        canvasEntity = new CanvasEntity(oImg, type, id, 0, tableEntity);
         entityPool.push(canvasEntity);
         document.getElementById(type.id + 'Lock').setAttribute('onclick', 'lockImage(' + id + ')');
         document.getElementById(type.id + 'Remove').setAttribute('onclick', 'removeEntity(' + id + ')');
@@ -126,15 +215,12 @@ function addEntity(type) {
     });
 
     var addInput = document.getElementById(type.id + 'Add').value;
-    var tableEntity;
-    // Selecting the entity named after the type parameter
-    for (var i = 0 ; i < tableEntities.length; i ++) {
-        if (tableEntities[i].name == type.id) {
-            tableEntity = tableEntities[i];
-            break;
-        }
-    }
-    // Building insert regex
+
+    // Running the insert statement
+    db.run(addInput);
+
+    
+    // Building insert regex - OBSOLETE - using SQL Library
     var insertRegex = "INSERT INTO " + tableEntity.name + "\\s?\\(\\s?";
     var columns = [];
     var columnIterator = tableEntity.properties.keys();
@@ -163,9 +249,10 @@ function addEntity(type) {
     var matchingInserts = insertMatch.exec(addInput);
     var record = [];
     for (var i = 1; i < matchingInserts.length; i ++) {
-        record.push(matchingInserts[i]);
+        record.push(matchingInserts[i].trim());                     // TO IMPLEMENT - could delete user input
     }
     record.reverse();
+    console.log(record);
     tableEntity.records.push(record);
 
     var tableId = '#' + type.id + 'Table';
@@ -186,12 +273,14 @@ function addEntity(type) {
 
     // Adding edit button with options for each value a property can take
     for (var i = 0; i < columns.length; i ++) {
-        console.log(columns[i])
+        record[i] = record[i].replace("'","").replace("'","");
+        //console.log(record[i]);
         $("#" + columns[i] + "List").append("<li class='list-group-item' id='" + columns[i] + "-" + record[i] + "Prop'>" + record[i] + "<div class='dropdown' style='float:right'>\
         <button class='btn btn-secondary dropdown-toggle' type='button' id='" + columns[i] + "Dropdown' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>\
-        Edit Value: </button><div class='dropdown-menu' aria-labelledby='" + columns[i] + "Dropdown'><button class='dropdown-item' onclick='transparency(\"" + columns[i] + "\", \"" + record[i] + "\")'>\
-        Change Transparency</button><button class='dropdown-item' onclick='editImage(\"" + columns[i] + "\", \"" + record[i] + "\")'>Add image</button></div></div></li>");
+        Edit Value: </button><div class='dropdown-menu' aria-labelledby='" + columns[i] + "Dropdown'><button class='dropdown-item' onclick='editImage(\"" + columns[i] + "\", \"" + record[i] + "\")'>Add image</button></div></div></li>");
     }
+
+    //console.log(db.exec("SELECT * FROM orcs")[0].columns);
 }
 
 // Function used for removing entity
@@ -209,6 +298,7 @@ function removeEntity(selectedId) {
 
 // Function used for setting image position
 function lockImage(selectedId) {
+    console.log(selectedId);
     var selectedEntity;
     for (var i = 0; i < entityPool.length; i++) {
         if (entityPool[i].id == selectedId) {
@@ -218,12 +308,17 @@ function lockImage(selectedId) {
     }
     //console.log(selectedEntity);
     var selectedItem;
+    console.log(canvas.getObjects());
     for (var i = 0; i < canvas.getObjects().length; i++) {
-        if (canvas.getObjects()[i] == selectedEntity.image) {
+        console.log("Object:   " + canvas.getObjects()[i]);
+        //console.log(canvas.getObjects()[i]._objects);
+        if (canvas.getObjects()[i] == selectedEntity.image || canvas.getObjects()[i]._objects != undefined) {
+            //console.log(canvas.getObjects()[i]._objects);
             selectedItem = canvas.getObjects()[i];
             break;
         }
     }
+    //console.log(selectedItem);
     selectedItem.selectable = false;
     selectedItem.lockRotation = selectedItem.lockScalingX = selectedItem.lockScalingY = selectedItem.lockMovementX = selectedItem.lockMovementY = true;
     selectedItem.selection = false;
@@ -235,10 +330,13 @@ function lockImage(selectedId) {
 function addEntityType() {
 
     // Regex matching for entity input - TO IMPLEMENT - input verification, more data types, more ? characters
-    var addEntityMatch = /CREATE TABLE (\w*)\s?\((\s?(\w*) (number|varchar2\(\d*\))\s?,?)*\);/;
+    var addEntityMatch = /CREATE TABLE (\w*)\s?\((\s?(\w*) (.*?)\s?,?)*\);/;
 
     // Variable used to store the initial entity input
     var inputText = $('#entityInput').val();
+
+    // Running the SQL for the create statement on the virtual database
+    db.run(inputText);
 
     // Array that stores the last matched groups from the input
     var matchingGroups = addEntityMatch.exec(inputText);
@@ -254,7 +352,7 @@ function addEntityType() {
     // While we can still match column names and types, the matchingGroups array and inputText variable are updated and the regex is verified
     // With each iteration, we also update the TableEntities's properites Map
     while (matchingGroups[3] != undefined) {
-        console.log('Column name: ' + matchingGroups[3] + '\tColumn type: ' + matchingGroups[4]);
+        //console.log('Column name: ' + matchingGroups[3] + '\tColumn type: ' + matchingGroups[4]);
         entity.properties.set(matchingGroups[3], matchingGroups[4]);
         inputText = inputText.replace(matchingGroups[2], "");
         matchingGroups = addEntityMatch.exec(inputText);
@@ -327,3 +425,134 @@ function addEntityType() {
 
     document.getElementById('entityInput').value = document.getElementById('entityInput').defaultValue;
 }
+
+// Method used for executing select statements in the virtual database
+function selectStatement() {
+    var inputText = $('#selectInput').val();
+    var queryResult = db.exec(inputText);
+    var selectedItems = [];
+
+    //console.log(queryResult[0].columns + "   " + queryResult[0].values);
+    for (var i = 0; i < entityPool.length; i ++) {
+        
+        //console.log(entityPool[i].tableEntity.properties.keys().next().value + "   " + entityPool[i].tableEntity.records[i]);
+        /*var counter = 0;
+        var columnsFlag = true;
+        for (var col of entityPool[i].tableEntity.properties.keys()) {
+            //console.log(counter);
+            //console.log(col);
+            //console.log(queryResult[0].columns[entityPool.length - counter]);
+            if (!queryResult[0].columns.includes(col)) {
+                //console.log("Match");
+                columnsFlag = false;
+                break; 
+            }
+            counter ++;
+        }*/
+        //console.log(queryResult[0].values);
+        //console.log(entityPool[i].tableEntity.records[i]);
+        //console.log(entityPool[i].tableEntity.records[0])
+        var recordsFlag = false;
+        if (queryResult[0] != undefined) {
+            for (var rec = 0; rec < entityPool[i].tableEntity.records[0].length; rec ++) {
+            //console.log(queryResult[0].values[0][rec] + "---DEBUG");}
+            for (var j = 0; j < queryResult[0].values.length; j ++) {
+                if (entityPool[i].tableEntity.records[0].includes(queryResult[0].values[j][rec]))
+                {
+                    recordsFlag = true;
+                    break;
+                }
+            }
+        }
+        }
+        
+        // TO IMPLEMENT - ONLY WORKS WITH 1, add to list, hightlight all
+        if (recordsFlag) {
+            console.log("Matching select");
+            selectedItems.push(entityPool[i]);
+            /*canvas.getObjects()[i + 1].opacity = 0.5;
+            canvas.add(canvas.getObjects()[i + 1]);
+            canvas.remove(canvas.getObjects()[i + 1]);
+            setTimeout(function(){
+                canvas.getObjects()[i].opacity = 1;
+                canvas.add(canvas.getObjects()[i]);
+                canvas.remove(canvas.getObjects()[i]);
+            }, 500);*/
+        }
+        //console.log(entityPool[i].image);
+        /*canvas.remove(canvas.getObjects()[i - 1]);
+        fabric.Image.fromURL('entity-sample-1.png', function(img) {
+            img.filters.push(new fabric.Image.filters.Sepia());
+            img.applyFilters(canvas.renderAll.bind(canvas));
+            canvas.add(img);
+        });*/
+        //console.log(canvas.getObjects()[i + 1]);
+        
+        //canvas.getObjects()[i + 1].filters.push(new fabric.Image.filters.Sepia());
+        //canvas.getObjects()[i + 1].applyFilters(canvas.renderAll.bind(canvas));
+        //entityPool[i].image.filters.push(new fabric.Image.filters.Sepia());
+        //entityPool[i].image.applyFilters(canvas.renderAll.bind(canvas));
+        // TO IMPLEMENT - HIGHLIGHT AND CLEAR FUNCTION
+    }
+
+    for (var j = 0; j < selectedItems.length; j ++)
+    {
+        console.log(selectedItems[j]);
+        selectedItems[j].image.opacity = 0.5;
+        var imageHolder = selectedItems[j].image;
+        canvas.remove(selectedItems[j].image);
+        canvas.add(imageHolder);
+    }
+    setTimeout(function() {
+        for (var j = 0; j < selectedItems.length; j ++)
+        {
+            selectedItems[j].image.opacity = 1;
+            var imageHolder = selectedItems[j].image;
+            canvas.remove(selectedItems[j].image);
+            canvas.add(imageHolder);
+            setTimeout(function() {
+                for (var j = 0; j < selectedItems.length; j ++)
+                {
+                    selectedItems[j].image.opacity = 0.5;
+                    var imageHolder = selectedItems[j].image;
+                    canvas.remove(selectedItems[j].image);
+                    canvas.add(imageHolder);
+                    setTimeout(function() {
+                    for (var j = 0; j < selectedItems.length; j ++)
+                    {
+                        selectedItems[j].image.opacity = 1;
+                        var imageHolder = selectedItems[j].image;
+                        canvas.remove(selectedItems[j].image);
+                        canvas.add(imageHolder);
+                    }
+                }, 500)
+                }
+            }, 500)
+        }
+    }, 500);
+
+    console.log(selectedItems);
+    
+    $('#selectResult').empty();
+
+    $('#selectResult').append("<table class='table table-striped table-dark' id='selectTable'><thead><tr><th scope='col'>#</th></tr></thead><tbody></tbody></table>");
+
+    if (queryResult[0] != undefined) {
+        for (var i = 0; i < queryResult[0].columns.length; i ++) {
+        $('#selectResult th:last').after("<th scope='col'>" + queryResult[0].columns[i] + "</th>")
+
+        //$('#tablesModalContent th:last').after("<td>&nbsp;&nbsp;" + record[i] + "</td>")
+    }
+
+        for (var i = 0; i < queryResult[0].values.length; i ++) {
+            $('#selectTable').find('tbody').append("<tr><th scope='row'>" + (i + 1) + "</th></tr>");
+            for (var j = queryResult[0].columns.length - 1; j >= 0; j --) {
+                $('#selectTable th:last').after("<td>" + queryResult[0].values[i][j] + "</td>")
+            }
+        }
+    }
+    
+    
+}
+
+

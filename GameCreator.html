@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="GameCreator.css">
+    <script src="https://cdn.rawgit.com/kripken/sql.js/master/js/sql.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/2.0.3/fabric.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
@@ -65,9 +66,22 @@
                 <br><br>
                 <div id="entities"></div>
             </div>
+            <div class="jumbotron">
+                <p class="h5"><b>Test out SELECT statements:</b></p>
+                <div class="input-group">
+                    <textarea class="form-control" placeholder="SELECT Statement" id="selectInput" rows="2"></textarea>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="selectStatement()">Select</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-md-5 offset-md-1">
-            <canvas id="gameCanvas" height="500" width="800"></canvas>
+            <canvas id="gameCanvas" height="500" width="780"></canvas>
+            <br><br>
+            <div class="jumbotron" id="selectResult">
+                <p class="h5"><b>SELECT results:</b></p>
+            </div>
         </div>
     </div>
 </body>
