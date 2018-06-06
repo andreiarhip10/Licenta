@@ -22,6 +22,9 @@ var sql = window.SQL;
 //Virtual database
 var db = new sql.Database();
 
+//Transient container for manipulating added images
+var imgContainer = [];
+
 // Canvas entity class
 class CanvasEntity {
     constructor(image, type, id, addedImages, tableEntity) {
@@ -136,56 +139,145 @@ function editImage(column, value) {
 }
 
 function applyImage(column, value) {
-    var img = fabric.util.object.clone(entityPool[id - 1].image)
+
+    imgContainer = [];
+
+
+    var img = fabric.util.object.clone(entityPool[id - 1].image);
     var group = new fabric.Group([img]);
+
+    imgContainer.push(img);
 
     var newImage = document.getElementById(column + "-" + value + "Option").value;
     var fakePath = newImage.split('\\');
     var path = fakePath[fakePath.length - 1];
     fabric.Image.fromURL(path, function(img) {
-        var addedImage = img.scale(0.1).set({ left: 100, top: 100 });
+        var addedImage = img.scale(0.1).set({ left: 100, top: 100, originX: 'center', originY: 'center' });
+
+        imgContainer.push(addedImage);
+
         group.add(addedImage);
-        console.log("Canvas entities before remove: " + canvas.getObjects());
+        //console.log("Canvas entities before remove: " + canvas.getObjects());
         canvas.remove(canvas.item(id));
         
         canvas.add(group);
-        console.log("Canvas entities after remove: " + canvas.getObjects());
+        //console.log("Canvas entities after remove: " + canvas.getObjects());
     })
 
-    console.log(group._objects);
+    //console.log(group._objects);
 
-    var jsonImg = JSON.stringify(img, null, 2);
+
+    //var jsonImg = JSON.stringify(img);
 
     // img.toString().replace("{", "\"{").replace("}", "\"}").replace("\"","\\\"").replace("#","\#")
 
     // TO IMPLEMENT - pass { } as parameters
+    
+    //var sentImg = img.toString();
 
     if (document.getElementById(column + "-" + value + "MoveUp") == null) {
         $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:10px' id='" + column + "-" + value + "MoveUp' \
-        onclick='moveUp\(\"" + path + "\"\, \"" + jsonImg + "\"\)'>Up</button>");
+        onclick='moveUp\()'>Up</button>");
     }
 
     entityPool[id - 1].image = group;
     
 }
 
-function moveUp(path, jsonImg) {
+// TO IMPLEMENT
 
-    var img = JSON.parse(jsonImg);
+function moveUp() {
 
-    img = img.toString().replace("crox1","{").replace("crox2", "}");
+    console.log(canvas.getObjects());
+    console.log(canvas.getObjects()[id]._objects);
 
-    var group = new fabric.Group([img]);
+    //console.log("Removing canvas item: " + canvas.item(id));
 
-    fabric.Image.fromURL(path, function(img) {
+    console.log(entityPool[id - 1].image);
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    //console.log(imgContainer[1]);
+
+
+    //canvas.add(imgContainer[0]);
+
+    //var img = fabric.util.object.clone([imgContainer[0]]);
+    var img = imgContainer[0];
+
+    var addedImgTop = img.top;
+
+    img.set({
+        top: addedImgTop + 10
+    });
+
+    var group = new fabric.Group([img, imgContainer[1]]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    console.log(group);
+    canvas.add(group);  
+
+    //console.log(img.getCoords());
+
+    /*fabric.Image.fromURL(imgContainer[1], function(oImg) {
+        //var addedImage = oImg.scale(0.1).set({ left: 100, top: 90, originX: 'center', originY: 'center' });
+        //group.add(addedImage);
+        //img.add(addedImage);
+        
+        //canvas.add(group);
+    })*/
+
+    //canvas.add(group);
+
+
+    //canvas.remove(canvas.getObjects()[id]._objects[0]);
+
+    //var targetImg = canvas.getObjects()[id][1];
+    
+
+    //var img = JSON.parse(jsonImg);
+
+    //img = img.toString().replace("crox1","{").replace("crox2", "}");
+
+    //console.log(path);
+
+    //var img = entityPool[id - 1].image;
+
+    //var targetImg = img._objects[1];
+
+    //targetImg.set({ top: top-- });
+
+    //console.log(img);
+    //console.log(targetImg);
+    //console.log(targetImg.getSrc());
+
+    //targetImg.opacity = 0.5;
+    //console.log(img._objects);
+    //console.log(img._objects.length)
+
+    //img.remove(img._objects[length - 1]);
+
+
+    //var group = new fabric.Group([img]);
+
+    //canvas.remove(img._objects[1]);
+
+    /*fabric.Image.fromURL(path, function(img) {
         var addedImage = img.scale(0.1).set({ left: 100, top: 90 });
         group.add(addedImage);
         canvas.remove(canvas.item(id));
         
         canvas.add(group);
-    })
+    })*/
 
-    entityPool[id - 1].image = group;
+    //entityPool[id - 1].image = group;
 }
 
 // Function used for adding entity - add after specific ID
@@ -282,6 +374,8 @@ function addEntity(type) {
 
     //console.log(db.exec("SELECT * FROM orcs")[0].columns);
 }
+
+// TO IMPLEMENT - DELETE CURRENT PROPERTIES ON REMOVE
 
 // Function used for removing entity
 function removeEntity(selectedId) {
