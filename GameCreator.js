@@ -105,7 +105,7 @@ function changeTransparency(value) {
 }*/
 
 
-// Function used for adding images to out base image
+// Function used for adding images to base image
 function editImage(column, value) {
     if (document.getElementById(column + "-" + value + "Option") != null) {
         document.getElementById(column + "-" + value + "Option").remove();
@@ -117,27 +117,13 @@ function editImage(column, value) {
         $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary' style='float:right;margin-right:10px' id='" + column + "-" + value + "AddImageButton' \
         onclick='applyImage(\"" + column + "\", \"" + value + "\")'>Add Image</button>");
     }
-    
-    // TO IMPLEMENT - ADD IMAGE FROM FILE IMPUT, MAKE IT SELECTABLE, POSITION IT, SELECT GROUP
-    /*fabric.Image.fromURL("entity-sample-1.png", function(img) {
-        var addedImg = img.scale(0.1).set({ left: 100, top: 100 });
-        group.add(addedImg);
-        console.log("Canvas entities before remove: " + canvas.getObjects());
-        canvas.remove(canvas.item(id));
-        
-        canvas.add(group);
-        console.log("Canvas entities after remove: " + canvas.getObjects());
-    })*/
-
-    
-
 
     entityPool[id - 1].addedImages ++;
-    // TO IMPLEMENT - support for changing image position, scale
     
     //group._objects[1].set({top: 50});
 }
 
+// Method used for placing image to current entity in initial position
 function applyImage(column, value) {
 
     imgContainer = [];
@@ -152,61 +138,89 @@ function applyImage(column, value) {
     var fakePath = newImage.split('\\');
     var path = fakePath[fakePath.length - 1];
     fabric.Image.fromURL(path, function(img) {
-        var addedImage = img.scale(0.1).set({ left: 100, top: 100, originX: 'center', originY: 'center' });
+        var addedImage = img.scale(0.1).set({ originX: 'center', originY: 'center' });
 
         imgContainer.push(addedImage);
 
+        // var angle = addedImage.angle;
+
+        // addedImage.set({
+        //     angle: angle + 15
+        // });
+
         group.add(addedImage);
-        //console.log("Canvas entities before remove: " + canvas.getObjects());
         canvas.remove(canvas.item(id));
-        
+
+        console.log(addedImage);
+
+        //console.log(addedImage.angle);
+
         canvas.add(group);
-        //console.log("Canvas entities after remove: " + canvas.getObjects());
     })
 
-    //console.log(group._objects);
 
-
-    //var jsonImg = JSON.stringify(img);
-
-    // img.toString().replace("{", "\"{").replace("}", "\"}").replace("\"","\\\"").replace("#","\#")
-
-    // TO IMPLEMENT - pass { } as parameters
-    
-    //var sentImg = img.toString();
 
     if (document.getElementById(column + "-" + value + "MoveUp") == null) {
-        $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:10px' id='" + column + "-" + value + "MoveUp' \
-        onclick='moveUp\()'>Up</button>");
+        $("#" + column + "-" + value + "Prop").append("<button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:6px' id='" + column + "-" + value + "MoveUp' \
+        onclick='moveUp\()'>&uarr;</button><button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:2px' id='" + column + "-" + value + "MoveDown' \
+        onclick='moveDown\()'>&darr;</button><button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:2px' id='" + column + "-" + value + "MoveRight' \
+        onclick='moveRight\()'>&rarr;</button><button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:2px' id='" + column + "-" + value + "MoveLeft' \
+        onclick='moveLeft\()'>&larr;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px;margin-left:35%' id='" + column + "-" + value + "Increase' \
+        onclick='increaseSize\()'>&#43;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "Decrease' \
+        onclick='decreaseSize\()'>&#45;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "RotateLeft' \
+        onclick='rotateLeft\()'>&#8630;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "RotateRight' \
+        onclick='rotateRight\()'>&#8631;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "IncreaseWidth' \
+        onclick='increaseWidth\()'>&#8596;</button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "IncreaseHeight' \
+        onclick='increaseHeight\()'>&#8597;</button></button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "DecreaseWidth' \
+        onclick='decreaseWidth\()'>&#10574;</button></button></button><button type='button' class='btn btn-secondary btn-sm' style='float:left;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "DecreaseHeight' \
+        onclick='decreaseHeight\()'>&#10577;</button></button></button><button type='button' class='btn btn-secondary btn-sm' style='float:right;margin-right:2px;margin-top:2px' id='" + column + "-" + value + "ClearEdit' \
+        onclick='clearEdit\()'>&#169;</button>");
     }
+
+    
 
     entityPool[id - 1].image = group;
     
 }
 
-// TO IMPLEMENT
 
+// TO IMPLEMENT - VALIDATIONS
+// Methods used for repositioning and resizing the added image
 function moveUp() {
-
-    console.log(canvas.getObjects());
-    console.log(canvas.getObjects()[id]._objects);
-
-    //console.log("Removing canvas item: " + canvas.item(id));
-
-    console.log(entityPool[id - 1].image);
 
     var top = entityPool[id - 1].image.top;
     var left = entityPool[id - 1].image.left;
 
     canvas.remove(entityPool[id - 1].image);
 
-    //console.log(imgContainer[1]);
+    var img = imgContainer[1];
 
+    var addedImgTop = img.top;
 
-    //canvas.add(imgContainer[0]);
+    img.set({
+        top: addedImgTop - 10
+    });
 
-    //var img = fabric.util.object.clone([imgContainer[0]]);
-    var img = imgContainer[0];
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function moveDown() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
 
     var addedImgTop = img.top;
 
@@ -214,70 +228,324 @@ function moveUp() {
         top: addedImgTop + 10
     });
 
-    var group = new fabric.Group([img, imgContainer[1]]);
+    var group = new fabric.Group([imgContainer[0], img]);
 
     group.set({
         top: top,
         left: left
     });
 
-    console.log(group);
     canvas.add(group);  
 
-    //console.log(img.getCoords());
+    entityPool[id - 1].image = group;
+}
 
-    /*fabric.Image.fromURL(imgContainer[1], function(oImg) {
-        //var addedImage = oImg.scale(0.1).set({ left: 100, top: 90, originX: 'center', originY: 'center' });
-        //group.add(addedImage);
-        //img.add(addedImage);
-        
-        //canvas.add(group);
-    })*/
+function moveLeft() {
 
-    //canvas.add(group);
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var addedImgLeft = img.left;
+
+    img.set({
+        left: addedImgLeft - 10
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function moveRight() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var addedImgLeft = img.left;
+
+    img.set({
+        left: addedImgLeft + 10
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
 
 
-    //canvas.remove(canvas.getObjects()[id]._objects[0]);
+function increaseSize() {
 
-    //var targetImg = canvas.getObjects()[id][1];
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var addedImgScaleX = img.scaleX;
+    var addedImgScaleY = img.scaleY;
+
+    img.set({
+        scaleX: addedImgScaleX + 0.1,
+        scaleY: addedImgScaleY + 0.1,
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function decreaseSize() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var addedImgScaleX = img.scaleX;
+    var addedImgScaleY = img.scaleY;
+
+    img.set({
+        scaleX: addedImgScaleX - 0.1,
+        scaleY: addedImgScaleY - 0.1,
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function rotateLeft() {
     
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
 
-    //var img = JSON.parse(jsonImg);
+    canvas.remove(entityPool[id - 1].image);
 
-    //img = img.toString().replace("crox1","{").replace("crox2", "}");
+    var img = imgContainer[1];
 
-    //console.log(path);
+    var angle = img.angle;
 
-    //var img = entityPool[id - 1].image;
+    img.set({
+        angle: angle - 15
+    });
 
-    //var targetImg = img._objects[1];
+    var group = new fabric.Group([imgContainer[0], img]);
 
-    //targetImg.set({ top: top-- });
+    group.set({
+        top: top,
+        left: left
+    });
 
-    //console.log(img);
-    //console.log(targetImg);
-    //console.log(targetImg.getSrc());
+    canvas.add(group);  
 
-    //targetImg.opacity = 0.5;
-    //console.log(img._objects);
-    //console.log(img._objects.length)
+    entityPool[id - 1].image = group;
+}
 
-    //img.remove(img._objects[length - 1]);
+function rotateRight() {
+    
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
 
+    canvas.remove(entityPool[id - 1].image);
 
-    //var group = new fabric.Group([img]);
+    var img = imgContainer[1];
 
-    //canvas.remove(img._objects[1]);
+    var angle = img.angle;
 
-    /*fabric.Image.fromURL(path, function(img) {
-        var addedImage = img.scale(0.1).set({ left: 100, top: 90 });
-        group.add(addedImage);
-        canvas.remove(canvas.item(id));
-        
-        canvas.add(group);
-    })*/
+    img.set({
+        angle: angle + 15
+    });
 
-    //entityPool[id - 1].image = group;
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function increaseWidth() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var scaleX = img.scaleX;
+
+    img.set({
+        scaleX: scaleX + 0.1
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function increaseHeight() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var scaleY = img.scaleY;
+
+    img.set({
+        scaleY: scaleY + 0.1
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function decreaseWidth() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var scaleX = img.scaleX;
+
+    img.set({
+        scaleX: scaleX - 0.1
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+function decreaseHeight() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    var scaleY = img.scaleY;
+
+    img.set({
+        scaleY: scaleY - 0.1
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
+}
+
+// TO IMPLEMENT - SAVE CHANGES TO SPECIAL ARRAY
+
+function clearEdit() {
+
+    var top = entityPool[id - 1].image.top;
+    var left = entityPool[id - 1].image.left;
+
+    canvas.remove(entityPool[id - 1].image);
+
+    var img = imgContainer[1];
+
+    img.set({
+        originX: 'center',
+        originY: 'center',
+        top: img.get('height')/2,
+        left: img.get('width')/2,
+        scaleX: 0.1,
+        scaleY: 0.1,
+        angle: 0
+    });
+
+    var group = new fabric.Group([imgContainer[0], img]);
+
+    group.set({
+        top: top,
+        left: left
+    });
+
+    canvas.add(group);  
+
+    entityPool[id - 1].image = group;
 }
 
 // Function used for adding entity - add after specific ID
@@ -337,14 +605,14 @@ function addEntity(type) {
     }
     insertRegex += "\\s?\\);";
     var insertMatch = new RegExp(insertRegex);
-    console.log(insertMatch.test(addInput));
+    //console.log(insertMatch.test(addInput));
     var matchingInserts = insertMatch.exec(addInput);
     var record = [];
     for (var i = 1; i < matchingInserts.length; i ++) {
         record.push(matchingInserts[i].trim());                     // TO IMPLEMENT - could delete user input
     }
     record.reverse();
-    console.log(record);
+    //console.log(record);
     tableEntity.records.push(record);
 
     var tableId = '#' + type.id + 'Table';
