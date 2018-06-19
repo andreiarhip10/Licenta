@@ -515,7 +515,7 @@ function decreaseHeight() {
     entityPool[id - 1].image = group;
 }
 
-// TO IMPLEMENT - SAVE CHANGES TO SPECIAL ARRAY
+// TO IMPLEMENT - SAVE CHANGES TO SPECIAL ARRAY, IMPLEMENT CHECK METHOD FOR ADDING EXISTING PROPERTIES
 
 function clearEdit() {
 
@@ -796,24 +796,6 @@ function selectStatement() {
 
     //console.log(queryResult[0].columns + "   " + queryResult[0].values);
     for (var i = 0; i < entityPool.length; i ++) {
-        
-        //console.log(entityPool[i].tableEntity.properties.keys().next().value + "   " + entityPool[i].tableEntity.records[i]);
-        /*var counter = 0;
-        var columnsFlag = true;
-        for (var col of entityPool[i].tableEntity.properties.keys()) {
-            //console.log(counter);
-            //console.log(col);
-            //console.log(queryResult[0].columns[entityPool.length - counter]);
-            if (!queryResult[0].columns.includes(col)) {
-                //console.log("Match");
-                columnsFlag = false;
-                break; 
-            }
-            counter ++;
-        }*/
-        //console.log(queryResult[0].values);
-        //console.log(entityPool[i].tableEntity.records[i]);
-        //console.log(entityPool[i].tableEntity.records[0])
         var recordsFlag = false;
         if (queryResult[0] != undefined) {
             for (var rec = 0; rec < entityPool[i].tableEntity.records[0].length; rec ++) {
@@ -828,33 +810,10 @@ function selectStatement() {
         }
         }
         
-        // TO IMPLEMENT - ONLY WORKS WITH 1, add to list, hightlight all
         if (recordsFlag) {
             console.log("Matching select");
             selectedItems.push(entityPool[i]);
-            /*canvas.getObjects()[i + 1].opacity = 0.5;
-            canvas.add(canvas.getObjects()[i + 1]);
-            canvas.remove(canvas.getObjects()[i + 1]);
-            setTimeout(function(){
-                canvas.getObjects()[i].opacity = 1;
-                canvas.add(canvas.getObjects()[i]);
-                canvas.remove(canvas.getObjects()[i]);
-            }, 500);*/
         }
-        //console.log(entityPool[i].image);
-        /*canvas.remove(canvas.getObjects()[i - 1]);
-        fabric.Image.fromURL('entity-sample-1.png', function(img) {
-            img.filters.push(new fabric.Image.filters.Sepia());
-            img.applyFilters(canvas.renderAll.bind(canvas));
-            canvas.add(img);
-        });*/
-        //console.log(canvas.getObjects()[i + 1]);
-        
-        //canvas.getObjects()[i + 1].filters.push(new fabric.Image.filters.Sepia());
-        //canvas.getObjects()[i + 1].applyFilters(canvas.renderAll.bind(canvas));
-        //entityPool[i].image.filters.push(new fabric.Image.filters.Sepia());
-        //entityPool[i].image.applyFilters(canvas.renderAll.bind(canvas));
-        // TO IMPLEMENT - HIGHLIGHT AND CLEAR FUNCTION
     }
 
     for (var j = 0; j < selectedItems.length; j ++)
@@ -901,19 +860,50 @@ function selectStatement() {
 
     if (queryResult[0] != undefined) {
         for (var i = 0; i < queryResult[0].columns.length; i ++) {
-        $('#selectResult th:last').after("<th scope='col'>" + queryResult[0].columns[i] + "</th>")
+        $('#selectResult th:last').after("<th scope='col'>" + queryResult[0].columns[i] + "</th>");
 
-        //$('#tablesModalContent th:last').after("<td>&nbsp;&nbsp;" + record[i] + "</td>")
     }
 
         for (var i = 0; i < queryResult[0].values.length; i ++) {
             $('#selectTable').find('tbody').append("<tr><th scope='row'>" + (i + 1) + "</th></tr>");
             for (var j = queryResult[0].columns.length - 1; j >= 0; j --) {
-                $('#selectTable th:last').after("<td>" + queryResult[0].values[i][j] + "</td>")
+                $('#selectTable th:last').after("<td>" + queryResult[0].values[i][j] + "</td>");
             }
         }
     }
     
+    
+}
+
+//Method used for serializing the data and send it - TO IMPLEMENT - SEND TO SERVER INSTEAD OF SAVING LOCALLY
+function finish() {
+
+    // FOR CANVAS SERIALIZATION
+    /*var serializedCanvas = JSON.stringify(canvas);
+    console.log(JSON.stringify(canvas));
+    canvas.clear();
+    canvas.loadFromJSON(serializedCanvas, canvas.renderAll.bind(canvas));*/
+
+    // FOR DB SERIALIZATION
+    /*console.log(db.exec("SELECT * FROM orcs;")[0].values[0]);
+    var serializedDb = db.export();
+    var deserializedDb = new sql.Database(serializedDb);
+    console.log(deserializedDb.exec("SELECT * FROM orcs;")[0].values[0]);*/
+
+    var serializedCanvas = JSON.stringify(canvas);
+    var serializedDb = db.export();
+    //var dbJson = JSON.stringify(serializedDb);
+    var serializedDataArray = JSON.stringify(entityPool);
+    function download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+    }
+    download(serializedCanvas, 'canvasJson.txt', 'text/plain');
+    download(serializedDb, 'serializedDb.db', 'application/octet-stream');
+    download(serializedDataArray, 'dataJson.txt', 'text/plain');
     
 }
 

@@ -13,3 +13,7 @@ body{
 #gameCanvas{
     background: white;
 }
+
+#finish{
+    float:right;
+}

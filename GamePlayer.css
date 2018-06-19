@@ -1,0 +1,13 @@
+body{
+    background: #d7d2f7
+}
+
+#playerCanvas{
+    background: white;
+}
+
+.row {
+    margin-top: 4em;
+    margin-right: 2em;
+    margin-left: 2em;
+}
