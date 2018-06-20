@@ -37,10 +37,23 @@
                     </div>
                 </form>
                 <button type="submit" class="btn btn-secondary" onclick="importData()">Import</button>
+                <br><br>
+                <p class="lead"> Execute queries on the database: </p>
+                <div class="input-group">
+                    <textarea class="form-control" placeholder="SELECT Statement" id="selectInputClient" rows="2"></textarea>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" onclick="selectStatementClient()">Select</button>
+                    </div>
+                </div>
+
             </div>
         </div>
         <div class="col">
             <canvas id="playerCanvas" height="500" width="780"></canvas>
+            <br>
+            <div class="jumbotron" id="selectResultClient">
+                <p class="lead">SELECT results:</p>
+            </div>
         </div>
     </div>
 </body>

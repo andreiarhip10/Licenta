@@ -126,6 +126,8 @@ function editImage(column, value) {
 // Method used for placing image to current entity in initial position
 function applyImage(column, value) {
 
+    console.log("CURRENT IMAGE: " + entityPool[id - 1].image);
+
     imgContainer = [];
 
 
@@ -141,12 +143,6 @@ function applyImage(column, value) {
         var addedImage = img.scale(0.1).set({ originX: 'center', originY: 'center' });
 
         imgContainer.push(addedImage);
-
-        // var angle = addedImage.angle;
-
-        // addedImage.set({
-        //     angle: angle + 15
-        // });
 
         group.add(addedImage);
         canvas.remove(canvas.item(id));
