@@ -1,3 +1,14 @@
+// Variable used for retrieving url
+var URL = document.URL.toString();
+
+// Game title
+var title = "";
+
+// Building game title
+for (var i = parseInt(URL.indexOf('=')) + 1; i < URL.length; i ++) {
+    title = title + URL[i];
+}
+
 //Global variable for canvas
 var canvas;
 
@@ -17,22 +28,66 @@ function initPlayerCanvas() {
     var serializedDb = document.getElementById('serializedDb');
     var serializedData = document.getElementById('serializedData');
 
-    serializedCanvas.addEventListener('change', function(e) {
-        var file = serializedCanvas.files[0];
-        var textType = /text.*/;
+    var response;
 
-        if (file.type.match(textType)) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // JSON is loaded succesfully, loading canvas
-                canvas.loadFromJSON(reader.result, canvas.renderAll.bind(canvas));
-            }
-            reader.readAsText(file);
-            
-        } else {
-            console.log("File type not supported!");
+    // TO IMPLEMENT - when uploading image, upload to hidden img element
+
+    var oReq = new XMLHttpRequest();
+    oReq.onload = function() {
+        
+        response = this.responseText;
+        //console.log(response);
+        var file = new File([response], "cjs.txt");
+        //console.log(file);
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            console.log(reader.result);
+            canvas.loadFromJSON(reader.result, canvas.renderAll.bind(canvas));
         }
-    })
+        reader.readAsText(file);
+    };
+    oReq.open("get", "http://192.168.1.239:8887/canvasJson2.txt", true);
+    oReq.send();
+
+    var file = new File([response], "cjs.txt");
+
+    var reader = new FileReader();
+    reader.readAsBinaryString(file);
+
+    reader.onloadend = function() {
+    }
+
+    /*var reader = new FileReader();
+    var result;
+    reader.onload = function(e) {
+        result = reader.result;
+        console.log(result);
+    }
+    reader.readAsText(file);
+    console.log(result);
+    canvas.loadFromJSON(result, canvas.renderAll.bind(canvas));*/
+
+    
+
+    // TO IMPLEMENT - send game folder as parameter, create file objects
+
+    // serializedCanvas.addEventListener('change', function(e) {
+    //     var file = serializedCanvas.files[0];
+    //     console.log(file);
+    //     var textType = /text.*/;
+
+    //     if (file.type.match(textType)) {
+    //         var reader = new FileReader();
+    //         reader.onload = function(e) {
+    //             // JSON is loaded succesfully, loading canvas
+    //             canvas.loadFromJSON(reader.result, canvas.renderAll.bind(canvas));
+    //         }
+    //         reader.readAsText(file);
+            
+    //     } else {
+    //         console.log("File type not supported!");
+    //     }
+    // })
 
     serializedDb.addEventListener('change', function(e) {
         var file = serializedDb.files[0];
@@ -69,6 +124,7 @@ function initPlayerCanvas() {
             console.log("File type not supported!");
         }
     })
+
 }
 
 // Method used for setting up canvas, db and other info

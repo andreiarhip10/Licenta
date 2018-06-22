@@ -62,7 +62,8 @@ function backgroundImage() {
     var selectedBackground = document.getElementById('backgroundSelect').value;
     var fakePath = selectedBackground.split('\\');
     path = fakePath[fakePath.length - 1];
-    fabric.Image.fromURL(path, function (oImg) {
+    var url = 'http://192.168.1.239:8887/' + path;
+    fabric.Image.fromURL(url, function (oImg) {
         canvas.add(oImg);
         backgroundImage = oImg;
     });
@@ -560,14 +561,40 @@ function addEntity(type) {
     var selectedImage = document.getElementById(type.id).value;
     var fakePath = selectedImage.split('\\');
     var path = fakePath[fakePath.length - 1];
-    fabric.Image.fromURL(path, function (oImg) {
+    //console.log(path);
+    /*var imgId = 'imgFor' + type.id;
+    $('body').append("<img id=\'" + imgId + "\' src=\'http://192.168.1.239:8887/" + path + "\' style='display: none;'/>");
+    
+    var hiddenImg = document.getElementById(imgId);
+    var imgInstance;
+    hiddenImg.addEventListener('load', function() {
+        width = this.naturalWidth;
+        height = this.naturalHeight;
+        imgInstance = new fabric.Image(this, {
+            top: 250,
+            left: 390,
+            width: this.naturalWidth,
+            height: this.naturalHeight
+        })
+        canvasEntity = new CanvasEntity(imgInstance, type, id, 0, tableEntity);
+        entityPool.push(canvasEntity);
+        document.getElementById(type.id + 'Lock').setAttribute('onclick', 'lockImage(' + id + ')');
+        document.getElementById(type.id + 'Remove').setAttribute('onclick', 'removeEntity(' + id + ')');
+        id = id + 1;
+        canvas.add(imgInstance);
+    })*/
+    //console.log(imgInstance);
+
+    var url = 'http://192.168.1.239:8887/' + path;
+    
+    fabric.Image.fromURL(url, function (oImg) {
         canvasEntity = new CanvasEntity(oImg, type, id, 0, tableEntity);
         entityPool.push(canvasEntity);
         document.getElementById(type.id + 'Lock').setAttribute('onclick', 'lockImage(' + id + ')');
         document.getElementById(type.id + 'Remove').setAttribute('onclick', 'removeEntity(' + id + ')');
         id = id + 1;
         canvas.add(oImg);
-        console.log(entityPool);
+        //console.log(entityPool);
     });
 
     var addInput = document.getElementById(type.id + 'Add').value;
@@ -897,6 +924,7 @@ function finish() {
         a.download = fileName;
         a.click();
     }
+    // TO IMPLEMENT - save to title directory
     download(serializedCanvas, 'canvasJson.txt', 'text/plain');
     download(serializedDb, 'serializedDb.db', 'application/octet-stream');
     download(serializedDataArray, 'dataJson.txt', 'text/plain');

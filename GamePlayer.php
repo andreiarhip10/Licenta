@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+
+<?php
+    $title = $_GET['game'];
+?>
+
 <html lang="en">
 
 <head>
@@ -24,8 +29,8 @@
     <div class="row">
         <div class="col">
             <div class="jumbotron">
-                <h2 class="display-4"> BD Game Player </h1> 
-                <p class="lead"> Select serialized files: </p>
+                <h2 class="display-4"> BD Game Player </h2> 
+                <p class="lead"> Select serialized files for game <?php echo json_encode($title) ?>:</p>
                 <form>
                     <div class="form-group">
                         <label for="serializedCanvas">Canvas:</label>
