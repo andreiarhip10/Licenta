@@ -28,12 +28,15 @@ function initPlayerCanvas() {
     var serializedDb = document.getElementById('serializedDb');
     var serializedData = document.getElementById('serializedData');
 
-    var response;
 
-    // TO IMPLEMENT - when uploading image, upload to hidden img element
+    console.log("hi");
 
     var oReq = new XMLHttpRequest();
+    console.log("hi2");
+
     oReq.onload = function() {
+
+        console.log("hi3");
         
         response = this.responseText;
         //console.log(response);
@@ -46,16 +49,18 @@ function initPlayerCanvas() {
         }
         reader.readAsText(file);
     };
-    oReq.open("get", "http://192.168.1.239:8887/canvasJson2.txt", true);
+    // Server hosting the directories
+    oReq.open("get", "http://192.168.100.16:8887/canvasJson2.txt", true);
     oReq.send();
 
-    var file = new File([response], "cjs.txt");
+    /*var file = new File([response], "cjs.txt");
 
     var reader = new FileReader();
     reader.readAsBinaryString(file);
 
     reader.onloadend = function() {
-    }
+        console.log(reader.result);
+    }*/
 
     /*var reader = new FileReader();
     var result;

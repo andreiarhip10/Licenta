@@ -14,6 +14,79 @@ body{
     background: white;
 }
 
-#finish{
-    float:right;
+.col {
+    margin-top: 3em;
+    margin-left: 3em;
 }
+
+.row {
+    margin-right: 1em;
+    margin-left: 1.5em;
+}
+
+.jumbotron {
+    padding: 30px 15px 30px 15px;
+}
+
+#textButton {
+    margin-left: 5px;
+}
+
+#text {
+    margin-top: 5px;
+}
+
+#objectivesButton {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#objectives {
+    margin-top: 5px;
+}
+
+#objectiveSelect {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#addObjectiveButton {
+    margin-top: 5px;
+}
+
+#addObjective {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#viewData {
+    margin-top: 10px;
+}
+
+#showTables {
+    margin-right: 15px;
+}
+
+#selectResult {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#createButton {
+    margin-left: 5px;
+}
+
+#entities {
+    margin-top: 15px;
+    margin-right: 5em;
+}
+
+.carousel-control-next, .carousel-control-prev {
+    width: 4%;
+}
+
+#backgroundSection {
+    margin-top: 15px;
+}
+
+
