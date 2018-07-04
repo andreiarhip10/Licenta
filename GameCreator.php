@@ -141,9 +141,16 @@
         echo $title;
         $path = "Games/" . $title;
         mkdir($path);
-        copy("C:\Users\Duda\Downloads\canvasJson.txt", "Games/" . $title . "/canvas.Json.txt");
+        copy("C:\Users\Duda\Downloads\canvasJson.txt", "Games/" . $title . "/canvasJson.txt");
         copy("C:\Users\Duda\Downloads\serializedDb.db", "Games/" . $title . "/serializedDb.db");
         copy("C:\Users\Duda\Downloads\dataJson.txt", "Games/" . $title . "/dataJson.txt");
+        copy("C:\Users\Duda\Downloads\infoJson.txt", "Games/" . $title . "/infoJson.txt");
+        copy("C:\Users\Duda\Downloads\img.png", "Games/" . $title . "/img.png");
+        unlink("C:\Users\Duda\Downloads\canvasJson.txt");
+        unlink("C:\Users\Duda\Downloads\serializedDb.db");
+        unlink("C:\Users\Duda\Downloads\dataJson.txt");
+        unlink("C:\Users\Duda\Downloads\infoJson.txt");
+        unlink("C:\Users\Duda\Downloads\img.png");
         // $cnv = $_GET['cnv'];
         // echo "<script>console.log(" . $cnv . ");</script>";
         //$db = $_GET['db'];

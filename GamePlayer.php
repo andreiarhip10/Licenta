@@ -29,20 +29,27 @@
     <div class="row">
         <div class="col">
             <div class="jumbotron">
-                <h2 class="display-4"> BD Game Player </h2> 
-                <p class="lead"> Select serialized files for game <?php echo json_encode($title) ?>:</p>
-                <form>
-                    <div class="form-group">
-                        <label for="serializedCanvas">Canvas:</label>
-                        <input class="custom-file" type="file" id="serializedCanvas">
-                        <label for="serializedDb">Database:</label>
-                        <input class="custom-file" type="file" id="serializedDb">
-                        <label for="serializedData">Data Array:</label>
-                        <input class="custom-file" type="file" id="serializedData">
-                    </div>
-                </form>
-                <button type="submit" class="btn btn-secondary" onclick="importData()">Import</button>
-                <br><br>
+                <h2 class="display-4"><?php echo str_replace("\"", "", json_encode($title)) ?></h2> 
+                <p class="lead" id="text"></p>
+                <div>
+                    <p class="h5">Objectives:</p>
+                    <ul class='list-group' id='objectives'>
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#tablesClient" id="showTablesClient" style='margin-top: 15px; margin-bottom: 15px'>Show Available Tables</button>
+                <div class="modal fade" id="tablesClient" tabindex="-1" role="dialog" aria-labelledby="tablesLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <p class="h3" class="modal-title" id="tablesLabel">Tables:</p>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" id="tablesModalContentClient"></div>
+                            </div>
+                        </div>
+                </div>
                 <p class="lead"> Execute queries on the database: </p>
                 <div class="input-group">
                     <textarea class="form-control" placeholder="SELECT Statement" id="selectInputClient" rows="2"></textarea>
@@ -50,15 +57,11 @@
                         <button class="btn btn-outline-secondary" type="button" onclick="selectStatementClient()">Select</button>
                     </div>
                 </div>
-
+                <div id="selectResultClient" style='margin-top: 10px;'></div>
             </div>
         </div>
-        <div class="col">
+        <div class="col" id='canvasCol'>
             <canvas id="playerCanvas" height="500" width="780"></canvas>
-            <br>
-            <div class="jumbotron" id="selectResultClient">
-                <p class="lead">SELECT results:</p>
-            </div>
         </div>
     </div>
 </body>

@@ -66,7 +66,7 @@
     echo 'var colCount = 1;';
     echo 'var rowCount = 1;';
     echo 'for (var i = 0; i < availableGames.length; i ++) {';
-    echo "$('#row' + rowCount).append('<div class=\'col\'><a href=GamePlayer.php?game=' + availableGames[i] + '><div class=\'card style=\'width: 18rem;\'><img class=\'card-img-top\' src=\'entity-sample-1.png\'><div class=\'card-body\'><p class=\'card-text\'>' + availableGames[i] + '</p></div></div></a></div>');";
+    echo "$('#row' + rowCount).append('<div class=\'col\'><a href=GamePlayer.php?game=' + availableGames[i] + '><div class=\'card style=\'width: 18rem;\'><img class=\'card-img-top\' src=\'Games/' + availableGames[i] + '/img.png\'><div class=\'card-body\'><p class=\'card-text\' id=\'text' + i + '\'>' + availableGames[i] + '</p></div></div></a></div>');";
     echo "colCount ++;";
     echo "if (colCount >= 6) {";    
     echo "rowCount ++; colCount = 0;}}";
@@ -74,6 +74,16 @@
     echo "for (var i = colCount + 1; i < 6; i ++) {";
     echo "$('#row' + rowCount).append('<div class=\'col\'></div>');}}";
     echo '</script>';
+
+    if ($_GET['completed'] != null) {
+        echo '<script>';
+        echo 'var completedGame;';
+        echo 'for (var i = 0; i < availableGames.length; i ++) {';
+        echo 'if (availableGames[i] == ' . json_encode($_GET['completed']) . ') {';
+        echo "$('#text' + i).text($('#text' + i).text() + ' - COMPLETED') }}";
+        echo '</script>';
+
+    }
 ?>
 
 </html>

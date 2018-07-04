@@ -21,114 +21,104 @@ var db;
 //Global variable for data array
 var entityPool;
 
+var text;
+
+var objectives;
+
+var selects;
+var selectResults = [];
+var selectColumns = [];
+
+var types = [];
+var columns = [];
+var records = [];
+
 //Method used for initializing canvas - TO IMPLEMENT
 function initPlayerCanvas() {
     canvas = new fabric.Canvas('playerCanvas');
-    var serializedCanvas = document.getElementById('serializedCanvas');
-    var serializedDb = document.getElementById('serializedDb');
-    var serializedData = document.getElementById('serializedData');
-
-
-    console.log("hi");
 
     var oReq = new XMLHttpRequest();
-    console.log("hi2");
 
-    oReq.onload = function() {
-
-        console.log("hi3");
+    oReq.onload = function(e) {
         
-        response = this.responseText;
-        //console.log(response);
-        var file = new File([response], "cjs.txt");
-        //console.log(file);
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            console.log(reader.result);
-            canvas.loadFromJSON(reader.result, canvas.renderAll.bind(canvas));
-        }
-        reader.readAsText(file);
+        canvas.loadFromJSON(this.response, canvas.renderAll.bind(canvas));
+        
+        
+        
     };
     // Server hosting the directories
-    oReq.open("get", "http://192.168.100.16:8887/canvasJson2.txt", true);
+    var address = "http://192.168.1.239:8887/Games/" + title;
+    oReq.open("get", address + "/canvasJson.txt", true);
     oReq.send();
 
-    /*var file = new File([response], "cjs.txt");
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', address + '/serializedDb.db', true);
+    xhr.responseType = 'arraybuffer';
 
-    var reader = new FileReader();
-    reader.readAsBinaryString(file);
+    xhr.onload = function(e) {
+        var uInt8Array = new Uint8Array(this.response);
+        db = new SQL.Database(uInt8Array);
+        //console.log(db.exec("SELECT * FROM orcs")[0].values[0]);
+    };
+    xhr.send();
 
-    reader.onloadend = function() {
-        console.log(reader.result);
-    }*/
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', address + '/dataJson.txt', true);
+    xhr.responseType = 'json';
+    xhr.onload = function(e) {
+        entityPool = this.response;
+        for (var i = 0; i < entityPool.length; i ++) {
+            if (types.indexOf(entityPool[i].tableEntity.name) == -1) {
+                types.push(entityPool[i].tableEntity.name);
+                
+                //console.log(types);
+            }
+        }
+        for (var i = 0; i < types.length; i ++) {
+            var exec = db.exec("SELECT * FROM " + types[i] + ";");
+            //console.log(exec[0].columns, exec[0].values);
+            columns.push(exec[0].columns);
+            records.push(exec[0].values);
 
-    /*var reader = new FileReader();
-    var result;
-    reader.onload = function(e) {
-        result = reader.result;
-        console.log(result);
+            $('#tablesModalContentClient').append("<p class='h3' style='text-align:center'><span class='badge badge-secondary'>" + types[i] + "</span></p>");
+            $('#tablesModalContentClient').append("<table class='table table-striped table-dark' id='" + types[i] + "Table'><thead><tr><th scope='col'>#</th></tr></thead><tbody></tbody></table>");
+            for (var j = 0; j < columns[i].length; j++) {
+                $('#tablesModalContentClient th:last').after("<th scope='col'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' class='btn btn-outline-info' disabled>" + columns[i][j] + "</button></th>")
+            }
+            //console.log(records[i]);
+            for (var j = 0; j < records[i].length; j ++) {
+                var tableId = '#' + types[i] + 'Table';
+                $(tableId).find('tbody').append("<tr><th scope='row'>" + (j + 1) + "</th></tr>")
+                //console.log(records[i][j]);
+                for (var k = columns[i].length - 1; k >= 0; k --) {
+                    $('#tablesModalContentClient th:last').after("<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + records[i][j][k] + "</td>")
+                }
+            }
+        }
     }
-    reader.readAsText(file);
-    console.log(result);
-    canvas.loadFromJSON(result, canvas.renderAll.bind(canvas));*/
+
+    xhr.send();
+
+    var req = new XMLHttpRequest();
+    req.open('GET', address + '/infoJson.txt', true);
+    req.responseType = 'json';
+    req.onload = function(e) {
+        //console.log(this.response);
+        text = this.response[0];
+        objectives = this.response[1];
+        selects = this.response[2];
+        $("#text").text(text);
+        for (var i = 0; i < objectives.length; i ++) {
+            $("#objectives").append("<li class='list-group-item list-group-item-primary' id='obj" + (i + 1) + "'>" + objectives[i] + "</li>");
+        }
+        for (var i = 0; i < selects.length; i ++) {
+            selectResults.push((db.exec(selects[i]))[0].values[0]);
+            selectColumns.push((db.exec(selects[i]))[0].columns);
+        }
+    }
+    req.send();
 
     
-
-    // TO IMPLEMENT - send game folder as parameter, create file objects
-
-    // serializedCanvas.addEventListener('change', function(e) {
-    //     var file = serializedCanvas.files[0];
-    //     console.log(file);
-    //     var textType = /text.*/;
-
-    //     if (file.type.match(textType)) {
-    //         var reader = new FileReader();
-    //         reader.onload = function(e) {
-    //             // JSON is loaded succesfully, loading canvas
-    //             canvas.loadFromJSON(reader.result, canvas.renderAll.bind(canvas));
-    //         }
-    //         reader.readAsText(file);
-            
-    //     } else {
-    //         console.log("File type not supported!");
-    //     }
-    // })
-
-    serializedDb.addEventListener('change', function(e) {
-        var file = serializedDb.files[0];
-        //console.log(file);
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            // JSON is loaded succesfully, loading db
-            //console.log(reader.results);
-            //var json = JSON.parse(reader.result);
-
-            //db & db.close();
-
-            db = new SQL.Database((e.target.result? new Uint8Array(e.target.result) : void 0));
-
-            //console.log(db.exec("SELECT * FROM orcsorcs;")[0].values[0]);
-            }
-        reader.readAsArrayBuffer(file);
-    })
-
-    serializedData.addEventListener('change', function(e) {
-        var file = serializedData.files[0];
-        var textType = /text.*/;
-
-        if (file.type.match(textType)) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // JSON is loaded succesfully, loading data
-                //console.log(JSON.parse(reader.result));
-                entityPool = JSON.parse(reader.result);
-            }
-            reader.readAsText(file);
-            
-        } else {
-            console.log("File type not supported!");
-        }
-    })
 
 }
 
@@ -175,12 +165,10 @@ function selectStatementClient() {
         }
         
         if (recordsFlag) {
-            console.log("Matching select");
             selectedItems.push(entityPool[i]);
         }
     }
 
-    console.log(selectedItems);
 
     for (var j = 0; j < selectedItems.length; j ++)
     {
@@ -221,9 +209,9 @@ function selectStatementClient() {
 
     if (queryResult[0] != undefined) {
         for (var i = 0; i < queryResult[0].columns.length; i ++) {
-        $('#selectResultClient th:last').after("<th scope='col'>" + queryResult[0].columns[i] + "</th>");
+            $('#selectResultClient th:last').after("<th scope='col'>" + queryResult[0].columns[i] + "</th>");
 
-    }
+        }
 
         for (var i = 0; i < queryResult[0].values.length; i ++) {
             $('#selectTableClient').find('tbody').append("<tr><th scope='row'>" + (i + 1) + "</th></tr>");
@@ -231,7 +219,37 @@ function selectStatementClient() {
                 $('#selectTableClient th:last').after("<td>" + queryResult[0].values[i][j] + "</td>");
             }
         }
+
+        for (var i = 0; i < selectResults.length; i ++) {
+            console.log(selectResults[i]);
+            console.log(queryResult[0].values[0]);
+            if (selectResults[i].length == queryResult[0].values[0].length) {
+                var flag = true;
+                for (var j = 0; j < selectResults[i].length; j ++) {
+                    if (selectResults[i][j] != queryResult[0].values[0][j]) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    //console.log('ok');
+                    $("#obj" + (i + 1)).after("<li class='list-group-item list-group-item-success'>" + inputText + "</li>")
+                    objectives.splice(i, 1);
+                }
+            }
+        
+        }
+
+        if (objectives.length == 0) {
+            setTimeout(function() {
+                window.alert("Congratulations! You have completed all the objectives.");
+                $("#canvasCol").append("<p style='text-align: center;'><a href='GameSelector.php?completed=" + title + "'><button type='button' class='btn btn-outline-info btn-lg' style='margin-top: 25px;'>Go to game selection</button></a></p>")
+            }, 3000);
+            
+        }
     }
+
+    
     
     
 }

@@ -82,6 +82,7 @@ var addedDrawingsList = [];
 
 var title;
 
+var text;
 
 // Function used for initiating canvas
 function initCanvas() {
@@ -1678,13 +1679,21 @@ function finish() {
     var serializedDb = db.export();
     //var dbJson = JSON.stringify(serializedDb);
     var serializedDataArray = JSON.stringify(entityPool);
+    
+    var infoArray = [];
 
     title = $("#title").val();
+    text = $("#text").val();
     //var canvasPackage = new Blob([serializedCanvas], {type: 'text/plain'});
     // dbPackage = new Blob([serializedDb], {type: 'application/octet-stream'});
     // dataPackage = new Blob([serializedDataArray], {type: 'text/plain'});
 
-    
+    infoArray.push(text);
+    infoArray.push(objectives);
+    infoArray.push(selects);
+
+    var serializedInfoArray = JSON.stringify(infoArray);
+
     function download(content, fileName, contentType) {
         var a = document.createElement("a");
         var file = new Blob([content], {type: contentType});
@@ -1692,10 +1701,19 @@ function finish() {
         a.download = fileName;
         a.click();
     }
-    // TO IMPLEMENT - save to title directory with AJAX POST
+
     download(serializedCanvas, 'canvasJson.txt', 'text/plain');
     download(serializedDb, 'serializedDb.db', 'application/octet-stream');
     download(serializedDataArray, 'dataJson.txt', 'text/plain');
+    download(serializedInfoArray, 'infoJson.txt', 'text/plain');
+
+    var link = document.createElement("a");
+    link.addEventListener('click', function(e) {
+        link.href = canvas.toDataURL();
+        link.download = "img.png";
+    }, false);
+    link.click();
+    
 
     setTimeout(function(){ 
         window.location.href = "http://localhost:8181/GameCreator/GameCreator.php?title=" + title;
@@ -1732,7 +1750,7 @@ $(document).ready(function() {
 $(document).ready(function() {
     $("#addObj").click(function() {
         $("#addObjective").fadeToggle();
-        console.log($("#addObj")[0].lastChild);
+        //console.log($("#addObj")[0].lastChild);
         if ($("#addObj")[0].lastChild.nodeValue == "+") {
             $("#addObj")[0].lastChild.nodeValue = "-";
         } else {
@@ -1750,7 +1768,7 @@ $(document).ready(function() {
         var objSelect = $("#objectiveSelect").val();
         objectives.push(objText);
         selects.push(objSelect);
-        console.log(objectives, selects);
+        //console.log(objectives, selects);
         $("#objectivesList").append("<li id=\'li" + objectives.length + "\' class='list-group-item list-group-item-info'>" + objText + "<span style='float:right;'><button class='btn btn-info btn-sm' style='padding-top: 0px;padding-bottom: 0px;padding-right: 0px;padding-left: 0px;width: 23px;' onclick=removeLi(\"" + objectives.length + "\")>X</button></span></li><li class='list-group-item list-group-item-light'>" + objSelect + "</li>")
         $("#objectiveText").val('');
         $("#objectiveSelect").val('');
